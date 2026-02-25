@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Test
+        run: go test ./...
+
+      - name: Build binaries
+        run: |
+          VERSION="v0.0.0-$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+          LDFLAGS="-s -w -X main.version=$VERSION"
+          mkdir -p dist
+
+          GOOS=linux   GOARCH=amd64 go build -ldflags "$LDFLAGS" -o dist/http-proxy-linux-amd64   ./cmd/http-proxy
+          GOOS=linux   GOARCH=arm64 go build -ldflags "$LDFLAGS" -o dist/http-proxy-linux-arm64   ./cmd/http-proxy
+          GOOS=darwin  GOARCH=amd64 go build -ldflags "$LDFLAGS" -o dist/http-proxy-darwin-amd64  ./cmd/http-proxy
+          GOOS=darwin  GOARCH=arm64 go build -ldflags "$LDFLAGS" -o dist/http-proxy-darwin-arm64  ./cmd/http-proxy
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: ${{ env.VERSION }}
+          generate_release_notes: true
+          files: dist/*
