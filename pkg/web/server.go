@@ -104,7 +104,8 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		fmt.Fprint(w, indexHTML)
+		data, _ := staticFS.ReadFile("static/index.html")
+		w.Write(data)
 	})
 }
 
