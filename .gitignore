@@ -1,4 +1,5 @@
-http-proxy # the binary, which we're wont to build and check in
+http-proxy  # the binary, which we're wont to build and check in
+main        # another commonly generated binary
 
 # Created by https://www.toptal.com/developers/gitignore/api/osx,vim,go
 # Edit at https://www.toptal.com/developers/gitignore?templates=osx,vim,go
